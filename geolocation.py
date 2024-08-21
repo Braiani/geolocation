@@ -20,11 +20,10 @@ def executar_geolocation(url, lista):
     data = preparar_range_ips(lista)
     # return fazer_requisicao(url, data)
 
-def geolocation_range_ips(ip):
-    lista_ips = []
+def geolocation_range_ips(ip, lista_ips: list):
     for i in range(1,256):
         lista_ips.append(ip.replace("0/24", "") + str(i))
-    print(lista_ips)
+    return lista_ips
 
 if __name__ == "__main__":
     url = "http://ip-api.com/batch"
@@ -44,10 +43,16 @@ if __name__ == "__main__":
             if "/32" in ip:
                 range_ips.append(ip.replace("/32", ""))
             elif "/24" in ip:
-                geolocation_range_ips(ip)
-                break
+                range_ips = geolocation_range_ips(ip, range_ips)
 
-        dados = executar_geolocation(url, range_ips)
-        if dados:
-            for dado in dados:
-                print(f"IP: {dado['query']}, Cidade: {dado['city']}, Estado: {dado['region']}, País: {dado['country']} ({dado['countryCode']})")
+        try:
+            with open("lista_ips_extends.txt", "+w") as file:
+                for ip in range_ips:
+                    file.write(ip + "\n")
+        except FileNotFoundError:
+            print(f"Arquivo não encontrado")
+
+        # dados = executar_geolocation(url, range_ips)
+        # if dados:
+        #     for dado in dados:
+        #         print(f"IP: {dado['query']}, Cidade: {dado['city']}, Estado: {dado['region']}, País: {dado['country']} ({dado['countryCode']})")
