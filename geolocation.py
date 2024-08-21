@@ -13,12 +13,18 @@ def fazer_requisicao(url, data=[]):
 def preparar_range_ips(lista):
     data = []
     for ip in lista:
-        data.append({"query": ip, "fields": "city,country,countryCode,query", "lang": "pt-BR" })
+        data.append({"query": ip, "fields": "city,country,countryCode,region,query,proxy", "lang": "pt-BR" })
     return data
 
 def executar_geolocation(url, lista):
     data = preparar_range_ips(lista)
-    return fazer_requisicao(url, data)
+    # return fazer_requisicao(url, data)
+
+def geolocation_range_ips(ip):
+    lista_ips = []
+    for i in range(1,256):
+        lista_ips.append(ip.replace("0/24", "") + str(i))
+    print(lista_ips)
 
 if __name__ == "__main__":
     url = "http://ip-api.com/batch"
@@ -37,8 +43,11 @@ if __name__ == "__main__":
         for ip in ips:
             if "/32" in ip:
                 range_ips.append(ip.replace("/32", ""))
+            elif "/24" in ip:
+                geolocation_range_ips(ip)
+                break
 
         dados = executar_geolocation(url, range_ips)
         if dados:
             for dado in dados:
-                print(f"IP: {dado['query']}, Cidade: {dado['city']}, País: {dado['country']} ({dado['countryCode']})")
+                print(f"IP: {dado['query']}, Cidade: {dado['city']}, Estado: {dado['region']}, País: {dado['country']} ({dado['countryCode']})")
